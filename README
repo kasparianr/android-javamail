@@ -1,0 +1,8 @@
+JavaMail port for the android plateform.
+
+Here is the link for original project: http://code.google.com/p/javamail-android/
+
+Modification : Add trust support to avoid the "Not trusted server certificate" issue
+
+
+
