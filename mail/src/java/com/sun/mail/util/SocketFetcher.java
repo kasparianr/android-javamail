@@ -291,9 +291,27 @@ public class SocketFetcher {
 		props.getProperty(prefix + ".socketFactory.class", null);
 	    SocketFactory sf = getSocketFactory(sfClass);
 	    if (sf != null && sf instanceof SSLSocketFactory)
-		ssf = (SSLSocketFactory)sf;
-	    else
-		ssf = (SSLSocketFactory)SSLSocketFactory.getDefault();
+	    ssf = (SSLSocketFactory)sf;
+	    else {
+	    String trusted;
+	    if ((trusted = props.getProperty(prefix + ".ssl.trust")) != null) {
+	    	try {
+	        MailSSLSocketFactory msf = new MailSSLSocketFactory();
+	        if (trusted.equals("*"))
+			    msf.setTrustAllHosts(true);
+			else
+			    msf.setTrustedHosts(trusted.split("\\s+"));
+	        ssf = msf;
+	    	}catch (GeneralSecurityException gex) {
+	    	IOException ioex = new IOException("Can't create MailSSLSocketFactory");
+			ioex.initCause(gex);
+			throw ioex;
+	    	}
+	    } else {
+	    	ssf = (SSLSocketFactory)SSLSocketFactory.getDefault();
+	    }
+	    }
+	    
 	    socket = ssf.createSocket(socket, host, port, true);
 	    configureSSLSocket(socket, props, prefix);
 	} catch (Exception ex) {
